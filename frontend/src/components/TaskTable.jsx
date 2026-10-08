@@ -8,9 +8,14 @@ export default function TaskTable({ tasks, loading, error }) {
   }
 
   if (!tasks || tasks.length === 0) {
-    return <div className="state-message">No tasks found.</div>;
+    return (
+      <div className="state-message empty-state">
+        <strong>No tasks found</strong>
+        
+        <span>Try adjusting your search or status filter.</span>
+      </div>
+    );
   }
-
   return (
     <table className="task-table">
       <thead>
@@ -31,10 +36,12 @@ export default function TaskTable({ tasks, loading, error }) {
               <div className="task-desc">{task.description}</div>
             </td>
             <td>
-              <span className={`status-badge ${task.status.toLowerCase()}`}>{task.status}</span>
+              <span className={`status-badge ${task.status.toLowerCase()}`}>
+                {task.status}
+              </span>
             </td>
             <td>{task.priority}</td>
-            <td>{task.assignee || '\u2014'}</td>
+            <td>{task.assignee || "\u2014"}</td>
           </tr>
         ))}
       </tbody>

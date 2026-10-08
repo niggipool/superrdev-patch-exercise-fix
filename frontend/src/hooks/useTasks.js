@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { fetchTasks } from '../api';
+import { useState, useEffect } from "react";
+import { fetchTasks } from "../api";
 
 export function useTasks(query, status, page, pageSize) {
   const [tasks, setTasks] = useState([]);
@@ -8,17 +8,32 @@ export function useTasks(query, status, page, pageSize) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
+    const controller = new AbortController();
 
-    fetchTasks({ query, status, page, pageSize })
-      .then((data) => {
-        setTasks(data.items);
-        setTotal(data.total);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-      });
+    setLoading(true);
+    setError(null);
+
+    const timeoutId = setTimeout(() => {
+      fetchTasks({ query, status, page, pageSize, signal: controller.signal })
+        .then((data) => {
+          setTasks(data.items);
+          setTotal(data.total);
+          setLoading(false);
+        })
+        .catch((err) => {
+          if (err.name === "AbortError") {
+            return;
+          }
+
+          setError(err.message);
+          setLoading(false);
+        });
+    }, 300);
+
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [query, status, page, pageSize]);
 
   return { tasks, total, loading, error };
